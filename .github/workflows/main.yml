@@ -14,6 +14,10 @@ jobs:
         env:
           PGEHACKATHON_SECRET_TOKEN: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
         run: |
+          curl \
+          --header 'Authorization: token ${{ secrets.PGEHACKATHON_ORG_TOKEN }}' \
+          --header 'Accept: application/vnd.github.v3.raw' \
+          -O --location "https://api.github.com/repos/PGEHackathon/truth_data/contents/True_for_predrill_3yr.npy"
           sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
           python score.py
       - name: Commit Changes
