@@ -1,0 +1,31 @@
+on:
+  repository_dispatch:
+    types: [trigger]
+jobs:
+  scoring:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment.yml
+      - name: Create Reports
+        shell: bash -l {0}
+        env:
+          PGEHACKATHON_SECRET_TOKEN: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
+        run: |
+          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
+          python score.py
+      - name: Commit Changes
+        shell: bash -l {0}
+        run: |
+          git config user.name 'PGEHackathon'
+          git config user.email 'john.foster@utexas.edu'
+          git add reports/*.pdf
+          git commit -am "Add reports"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          force: true
