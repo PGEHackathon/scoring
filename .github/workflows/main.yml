@@ -1,4 +1,5 @@
 on:
+  push:
   repository_dispatch:
     types: [trigger]
 jobs:

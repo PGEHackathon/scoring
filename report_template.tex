@@ -46,4 +46,20 @@ Fig~\ref{fig:realizations} shows your team's uncertainty model and the actual pr
 %
 Fig~\ref{fig:realizations} shows your team's goodness score plot for the 10 preproduction wells.  Your final goodness score is \VAR{goodness}.
 
+\newpage
+
+\section*{Presentation comments}
+\begin{itemize}
+\BLOCK{ for item in presentationComments }
+  \item \VAR{item}
+\BLOCK{ endfor }
+\end{itemize}
+
+\section*{Code review comments}
+\begin{itemize}
+\BLOCK{ for item in codereviewComments }
+  \item \VAR{item}
+\BLOCK{ endfor }
+\end{itemize}
+
 \end{document}  

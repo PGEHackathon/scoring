@@ -1,6 +1,7 @@
 \documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
 \usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
 \geometry{letterpaper}                    	% ... or a4paper or a5paper or ... 
+\usepackage{pdflscape}
 \usepackage{graphicx}					
 \usepackage{amssymb}
 \usepackage{booktabs}
@@ -13,13 +14,15 @@
 \date{}
 
 \begin{document}
-\maketitle
-
+\thispagestyle{empty}
+\newgeometry{margin=1cm}
+\begin{landscape}
 \begin{table}[htbp] %  figure placement: here, top, bottom, or page
    \centering
-   \caption{Final team rankings based on combined lowest MSE and highest goodness score}
+   \caption{Final team rankings}
    \scalebox{0.75}{\input{final_rankings_table.tex}}
    \label{tab:table}
 \end{table}
-
+\end{landscape}
+\restoregeometry
 \end{document}  
