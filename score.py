@@ -17,6 +17,7 @@ matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
     prediction_array = prediction_df['Prediction, MSTB'].to_numpy()
+    plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
     plt.plot([500,2000],[500,2000],'--r',label = '1:1 line')
     plt.plot([solution_array[0], solution_array[0]],
@@ -85,7 +86,7 @@ def create_goodness_plot_and_return_goodness_score(prediction_df, solution_array
     plt.figure(figsize = (6,4))
     plt.plot(goodness_score,'--ko', label = 'Goodness')
     plt.plot([0,10],[0,10], '-r', label = '1:1 line')
-    plt.fill([i for i in range(11)],goodness_score,alpha = 0.2, label = 'misfit area')
+    #plt.fill([i for i in range(11)],goodness_score,alpha = 0.2, label = 'misfit area')
     plt.xticks([i for i in np.linspace(0,10,6)], [f'{np.int(i*10)}%' for i in np.linspace(0,10,6)])
     plt.yticks([i for i in np.linspace(0,10,6)], [f'{np.int(i*10)}%' for i in np.linspace(0,10,6)])
     plt.xlabel('Within percentile'); 
@@ -107,7 +108,7 @@ def create_goodness_plot_and_return_goodness_score(prediction_df, solution_array
         else:
             goodness_score_ -= -goodness_score_upNdown[i+1]/55
 
-    return np.round(goodness_score_,3)
+    return np.abs(np.round(goodness_score_,3))
 
 latex_jinja_env = jinja2.Environment(
     block_start_string = '\BLOCK{',
