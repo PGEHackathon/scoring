@@ -4,3 +4,5 @@
 
 This repository contains CI scripts that automatically score PGE Hackathon
 participants submissions.
+
+Scoring is based on:
