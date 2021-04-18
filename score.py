@@ -201,7 +201,8 @@ if __name__ == '__main__':
 
     blocked_list = ['PGEHackathon/data', 'PGEHackathon/workshop', 
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
-                    'PGEHackathon/resources', 'PGEHackathon/truth_data']
+                    'PGEHackathon/resources', 'PGEHackathon/TheNomads', 
+                    'PGEHackathon/truth_data']
 
     solution_array = np.load('True_for_predrill_3yr.npy') # Solution
 
@@ -210,7 +211,9 @@ if __name__ == '__main__':
     team_goodness_score = []
     for repo in repos:
 
+
         if repo not in blocked_list:
+            print(f"Generating Report For: {repo}")
 
             result = gh.get_file_in_repo('solution.csv', repo)
 
