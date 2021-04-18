@@ -204,7 +204,7 @@ if __name__ == '__main__':
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
                     'PGEHackathon/resources', 'PGEHackathon/TheNomads', 
                     'PGEHackathon/truth_data', 'PGEHackathon/fooled-by-randomness', 
-                    'PGEHackathon/404_Not_Found', 'PGEHackathon/ripROACH']
+                    'PGEHackathon/404_Not_Found', 'PGEHackathon/ripROACH', 'PGEHackathon/PumpJack']
 
     solution_array = np.load('True_for_predrill_3yr.npy') # Solution
 
