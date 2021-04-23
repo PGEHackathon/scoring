@@ -74,6 +74,7 @@ def compute_goodness_array(prediction_df, solution_array):
         for j in range(10): # 10 Predrill wells
             min_ = np.percentile(prediction_realizations[j],list_percentile_lower[i])
             max_ = np.percentile(prediction_realizations[j],list_percentile_upper[i])
+            print(solution_array[j])
             if solution_array[j] > min_ and solution_array[j] < max_:
                 num_within += 1
         goodness_score.append(num_within)
@@ -269,16 +270,16 @@ if __name__ == '__main__':
 
     df['Pres. Score'] = presentation_score_df
     df['Code Score'] = code_review_score_df
-    df['MSE Rank'] = df['MSE'].astype('float64').rank(method='min', ascending=True).astype('int')
-    df['Goodness Rank'] = df['Goodness Score'].astype('float64').rank(method='min', ascending=False).astype('int')
-    df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False).astype('int')
-    df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False).astype('int')
+    df['MSE Rank'] = df['MSE'].astype('float64').rank(method='min', ascending=True, na_option='top')
+    df['Goodness Rank'] = df['Goodness Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
+    df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
+    df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
     df['Overall Rank'] = (df['MSE Rank'].astype('float64') + 
                           df['Goodness Rank'].astype('float64') + 
                           df['Pres. Rank'].astype('float64') + 
                           df['Code Rank'].astype('float64')
-                         ).rank(method='min').astype('int')
+                         ).rank(method='min')
 
     df.sort_values('Overall Rank', inplace=True)
     df.index.name = None
