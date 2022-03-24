@@ -228,7 +228,7 @@ if __name__ == '__main__':
 
                 print(f'Fetching results file {team_name}.UNSMRY')
                 result = gh.get_file_in_repo(f'{team_name}.UNSMRY', 
-                                             'PGEHackathon/simulation_results')
+                                             'PGEHackathon/simulation_results', decoder='ascii')
 
                 if result is not None:
 

@@ -102,7 +102,7 @@ class Github(object):
             
         return 
 
-    def get_file_in_repo(self, filename, repo):
+    def get_file_in_repo(self, filename, repo, decoder='utf-8'):
         
         result = requests.get("https://api.github.com/repos/{}/contents/{}".format(repo, filename), 
                       headers=self.headers)
@@ -110,7 +110,7 @@ class Github(object):
         if result.status_code == 200:
             byte_content = result.json()['content']
             base64_bytes = base64.b64decode(byte_content)
-            base64_string = base64_bytes.decode('utf-8')
+            base64_string = base64_bytes.decode(decoder)
             return base64_string
         else:
             return None
