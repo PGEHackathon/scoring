@@ -226,7 +226,7 @@ if __name__ == '__main__':
                 team_name = repo.split('/')[1]
                 team_names.append(team_name)
 
-                eclipse.generate_input_deck(StringIO(result), repo)
+                eclipse.generate_input_deck(StringIO(result), team_name)
 
                 # prediction_df = pd.read_csv(StringIO(result))
 
