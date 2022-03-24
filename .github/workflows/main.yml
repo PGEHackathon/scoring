@@ -20,7 +20,7 @@ jobs:
           --header 'Accept: application/vnd.github.v3.raw' \
           -O --location "https://api.github.com/repos/PGEHackathon/hidden/contents/template.DATA"
           python score.py
-          ls
+          ls input_decks/
           #sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
       #- name: Commit Changes
         #shell: bash -l {0}
