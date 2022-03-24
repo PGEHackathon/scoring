@@ -216,7 +216,7 @@ if __name__ == '__main__':
 
 
         if repo not in blocked_list:
-            print(f"Generating Report For: {repo}")
+            print(f"Generating Input Deck For: {repo}")
 
             result = gh.get_file_in_repo('solution.csv', repo)
 

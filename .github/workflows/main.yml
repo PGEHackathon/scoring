@@ -21,6 +21,16 @@ jobs:
           -O --location "https://api.github.com/repos/PGEHackathon/hidden/contents/template.DATA"
           python score.py
           ls input_decks/
+      - name: Push to input_decks
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
+        with:
+          source-directory: 'input_decks'
+          destination-github-username: 'PGEHackathon'
+          destination-repository-name: 'input_decks'
+          user-email: 'john.foster@utexas.edu'
+          target-branch: main
           #sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
       #- name: Commit Changes
         #shell: bash -l {0}
