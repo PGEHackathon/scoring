@@ -197,7 +197,6 @@ if __name__ == '__main__':
     from github import Github
     from io import StringIO
 
-
     gh = Github(os.environ['PGEHACKATHON_SECRET_TOKEN'])
 
     repos = gh.get_organization_repos('PGEHackathon')
@@ -205,7 +204,7 @@ if __name__ == '__main__':
     blocked_list = ['PGEHackathon/data', 'PGEHackathon/workshop', 
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
                     'PGEHackathon/resources', 'PGEHackathon/hidden',
-                    'PGEHackathon/truth_data', 'PGEHackathon/input_decks',
+                    'PGEHackathon/truth_data', 'PGEHackathon/submissions',
                     'PGEHackathon/johntfoster', 'PGEHackathon/simulation_results']
 
     team_names = []
@@ -215,7 +214,7 @@ if __name__ == '__main__':
 
 
         if repo not in blocked_list:
-            print(f"Generating simulation input file for: {repo}")
+            print(f"Moving submission file for: {repo}")
 
             result = gh.get_file_in_repo('scoring/submission/solution.csv', repo)
 
@@ -224,15 +223,9 @@ if __name__ == '__main__':
                 team_name = repo.split('/')[1]
                 team_names.append(team_name)
 
-                eclipse.generate_input_deck(StringIO(result), team_name)
+                submission = pd.read_csv(StringIO(result))
+                submission.write_csv(f'submissions/{team_name}_solution.csv')
 
-                print(f'Fetching results file {team_name}.UNSMRY')
-                result = gh.get_file_in_repo(f'{team_name}.UNSMRY', 
-                                             'PGEHackathon/simulation_results')
-
-                if result is not None:
-
-                    print(eclipse.get_simulation_results(StringIO(result)))
 
                 # prediction_df = pd.read_csv(StringIO(result))
 
