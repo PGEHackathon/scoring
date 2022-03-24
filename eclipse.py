@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from load_output import fread,read_ecl
+# from load_output import fread,read_ecl
 
 sub_id='0' # team name
 model_shape=[256,200]
