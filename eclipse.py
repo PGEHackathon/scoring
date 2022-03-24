@@ -15,8 +15,8 @@ my_test_folder2='D:/commingle/fine_prop/submission/'
 def generate_input_deck(file:str, repo_name:str):
 
     myinput=pd.read_csv(file)
-    x=(myinput['X(m)'].values-20-33333)//40
-    y=(myinput['Y(m)'].values-20-22222)//40
+    x=(myinput['X(ft)'].values-20-33333)//40
+    y=(myinput['Y(ft)'].values-20-22222)//40
 
     # correct if well location exceed model size
     x[x>=model_shape[0]]=model_shape[0]-1
