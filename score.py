@@ -205,7 +205,7 @@ if __name__ == '__main__':
     blocked_list = ['PGEHackathon/data', 'PGEHackathon/workshop', 
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
                     'PGEHackathon/resources', 'PGEHackathon/hidden',
-                    'PGEHackathon/truth_data']
+                    'PGEHackathon/truth_data', 'PGEHackathon/input_decks']
 
     # solution_array = np.load('True_for_predrill_3yr.npy') # Solution
 
