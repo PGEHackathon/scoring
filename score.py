@@ -226,8 +226,7 @@ if __name__ == '__main__':
 
                 eclipse.generate_input_deck(StringIO(result), team_name)
 
-                print(f"Reading simulations results for: {repo}")
-
+                print(f'Fetching results file {team_name}.UNSMRY')
                 result = gh.get_file_in_repo(f'{team_name}.UNSMRY', 
                                              'PGEHackathon/simulation_results')
 
