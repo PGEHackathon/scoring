@@ -224,7 +224,7 @@ if __name__ == '__main__':
                 team_names.append(team_name)
 
                 submission = pd.read_csv(StringIO(result))
-                submission.write_csv(f'submissions/{team_name}_solution.csv')
+                submission.csv_write(f'submissions/{team_name}_solution.csv')
 
 
                 # prediction_df = pd.read_csv(StringIO(result))
