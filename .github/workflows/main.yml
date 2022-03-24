@@ -15,10 +15,7 @@ jobs:
         env:
           PGEHACKATHON_SECRET_TOKEN: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
         run: |
-          curl \
-          --header 'Authorization: token ${{ secrets.PGEHACKATHON_ORG_TOKEN }}' \
-          --header 'Accept: application/vnd.github.v3.raw' \
-          -O --location "https://api.github.com/repos/PGEHackathon/hidden/contents/template.DATA"
+          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
           python score.py
       - name: Push to submissions
         uses: cpina/github-action-push-to-another-repository@main
@@ -30,17 +27,16 @@ jobs:
           destination-repository-name: 'input_decks'
           user-email: 'john.foster@utexas.edu'
           target-branch: main
-          #sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
-      #- name: Commit Changes
-        #shell: bash -l {0}
-        #run: |
-          #git config user.name 'PGEHackathon'
-          #git config user.email 'john.foster@utexas.edu'
-          #git add reports/*.pdf
-          #git commit -am "Add reports"
-      #- name: Push changes
-        #uses: ad-m/github-push-action@master
-        #with:
-          #github_token: ${{ secrets.GITHUB_TOKEN }}
-          #branch: ${{ github.ref }}
-          #force: true
+      - name: Commit Changes
+        shell: bash -l {0}
+        run: |
+          git config user.name 'PGEHackathon'
+          git config user.email 'john.foster@utexas.edu'
+          git add reports/*.pdf
+          git commit -am "Add reports"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          force: true

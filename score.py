@@ -11,7 +11,6 @@ import os
 import subprocess
 import matplotlib
 import json
-import eclipse
 
 pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
