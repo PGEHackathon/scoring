@@ -11,6 +11,7 @@ import os
 import subprocess
 import matplotlib
 import json
+import eclipse
 
 pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
@@ -207,7 +208,7 @@ if __name__ == '__main__':
                     'PGEHackathon/truth_data', 'PGEHackathon/fooled-by-randomness', 
                     'PGEHackathon/404_Not_Found', 'PGEHackathon/ripROACH', 'PGEHackathon/PumpJack']
 
-    solution_array = np.load('True_for_predrill_3yr.npy') # Solution
+    # solution_array = np.load('True_for_predrill_3yr.npy') # Solution
 
     team_names = []
     team_mse = []
@@ -225,67 +226,69 @@ if __name__ == '__main__':
                 team_name = repo.split('/')[1]
                 team_names.append(team_name)
 
-                prediction_df = pd.read_csv(StringIO(result))
+                eclipse.generate_input_deck(StringIO(result), repo)
 
-                mse = create_accuracy_plot_and_return_mse(prediction_df, 
-                                                          solution_array)
-                team_mse.append(mse)
+                # prediction_df = pd.read_csv(StringIO(result))
 
-                create_realizations_plots(prediction_df, solution_array)
+                # mse = create_accuracy_plot_and_return_mse(prediction_df, 
+                                                          # solution_array)
+                # team_mse.append(mse)
 
-                goodness_score = \
-                    create_goodness_plot_and_return_goodness_score(prediction_df,
-                                                                   solution_array)
-                team_goodness_score.append(goodness_score)
+                # create_realizations_plots(prediction_df, solution_array)
 
-                presentation_score_df, presentation_comments_df = \
-                    get_presentation_dataframes('presentation.csv')
+                # goodness_score = \
+                    # create_goodness_plot_and_return_goodness_score(prediction_df,
+                                                                   # solution_array)
+                # team_goodness_score.append(goodness_score)
 
-                code_review_score_df, code_review_comments_df = \
-                    get_code_review_dataframes('code_review.csv')
+                # presentation_score_df, presentation_comments_df = \
+                    # get_presentation_dataframes('presentation.csv')
 
-
-                try:
-                    presentation_comments = \
-                        presentation_comments_df[parse_team_name(team_name)]
-                    code_review_comments = \
-                        code_review_comments_df[parse_team_name(team_name)]
-                except:
-                    presentation_comments = ["None"]
-                    code_review_comments = ["None"]
+                # code_review_score_df, code_review_comments_df = \
+                    # get_code_review_dataframes('code_review.csv')
 
 
-                create_team_report(team_name, mse, 
-                                   goodness_score, 
-                                   presentation_comments,
-                                   code_review_comments)
+                # try:
+                    # presentation_comments = \
+                        # presentation_comments_df[parse_team_name(team_name)]
+                    # code_review_comments = \
+                        # code_review_comments_df[parse_team_name(team_name)]
+                # except:
+                    # presentation_comments = ["None"]
+                    # code_review_comments = ["None"]
 
-    df = pd.DataFrame(np.array([team_names, 
-                                team_mse, 
-                                team_goodness_score]).T, columns=['Team Names',
-                                                                  'MSE',
-                                                                  'Goodness Score'])
-    df['Short Names'] = df['Team Names'].apply(parse_team_name)
-    df.set_index(['Short Names'], inplace=True)
 
-    df['Pres. Score'] = presentation_score_df
-    df['Code Score'] = code_review_score_df
-    df['MSE Rank'] = df['MSE'].astype('float64').rank(method='min', ascending=True, na_option='top')
-    df['Goodness Rank'] = df['Goodness Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
-    df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
-    df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
+                # create_team_report(team_name, mse, 
+                                   # goodness_score, 
+                                   # presentation_comments,
+                                   # code_review_comments)
 
-    df['Overall Rank'] = (df['MSE Rank'].astype('float64') + 
-                          df['Goodness Rank'].astype('float64') + 
-                          df['Pres. Rank'].astype('float64') + 
-                          df['Code Rank'].astype('float64')
-                         ).rank(method='min')
+    # df = pd.DataFrame(np.array([team_names, 
+                                # team_mse, 
+                                # team_goodness_score]).T, columns=['Team Names',
+                                                                  # 'MSE',
+                                                                  # 'Goodness Score'])
+    # df['Short Names'] = df['Team Names'].apply(parse_team_name)
+    # df.set_index(['Short Names'], inplace=True)
 
-    df.sort_values('Overall Rank', inplace=True)
-    df.index.name = None
-    #df.reset_index(inplace=True)
-    with open('final_rankings_table.tex', 'w') as f:
-        df.to_latex(index=False, buf=f)
+    # df['Pres. Score'] = presentation_score_df
+    # df['Code Score'] = code_review_score_df
+    # df['MSE Rank'] = df['MSE'].astype('float64').rank(method='min', ascending=True, na_option='top')
+    # df['Goodness Rank'] = df['Goodness Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
+    # df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
+    # df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
-    subprocess.run(['latexmk', '-pdf', 
-                    '-output-directory=reports', 'final_report.tex'])
+    # df['Overall Rank'] = (df['MSE Rank'].astype('float64') + 
+                          # df['Goodness Rank'].astype('float64') + 
+                          # df['Pres. Rank'].astype('float64') + 
+                          # df['Code Rank'].astype('float64')
+                         # ).rank(method='min')
+
+    # df.sort_values('Overall Rank', inplace=True)
+    # df.index.name = None
+    # #df.reset_index(inplace=True)
+    # with open('final_rankings_table.tex', 'w') as f:
+        # df.to_latex(index=False, buf=f)
+
+    # subprocess.run(['latexmk', '-pdf', 
+                    # '-output-directory=reports', 'final_report.tex'])
