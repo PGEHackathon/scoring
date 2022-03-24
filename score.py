@@ -207,8 +207,6 @@ if __name__ == '__main__':
                     'PGEHackathon/resources', 'PGEHackathon/hidden',
                     'PGEHackathon/truth_data', 'PGEHackathon/input_decks']
 
-    # solution_array = np.load('True_for_predrill_3yr.npy') # Solution
-
     team_names = []
     team_mse = []
     team_goodness_score = []
@@ -216,9 +214,9 @@ if __name__ == '__main__':
 
 
         if repo not in blocked_list:
-            print(f"Generating Input Deck For: {repo}")
+            print(f"Generating simulation input file for: {repo}")
 
-            result = gh.get_file_in_repo('solution.csv', repo)
+            result = gh.get_file_in_repo('scoring/submission/solution.csv', repo)
 
             if result is not None:
 
@@ -226,6 +224,15 @@ if __name__ == '__main__':
                 team_names.append(team_name)
 
                 eclipse.generate_input_deck(StringIO(result), team_name)
+
+                print(f"Reading simulations results for: {repo}")
+
+                result = gh.get_file_in_repo(f'{team_name}.UNSMRY', 
+                                             'PGEHackathon/simulation_results')
+
+                if result is not None:
+
+                    print(eclipse.get_simulation_results(StringIO(result)))
 
                 # prediction_df = pd.read_csv(StringIO(result))
 

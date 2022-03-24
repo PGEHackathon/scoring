@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-# from load_output import fread,read_ecl
+from load_output import read_ecl
 
 sub_id='0' # team name
 model_shape=[256,200]
@@ -47,10 +47,12 @@ def generate_input_deck(file:str, repo_name:str):
 # os.system(command)
 
 # read output
-# field_prod=[]
-# well_prod=[]
-# out=read_ecl(my_test_folder2+'sub_'+str(sub_id)+'.UNSMRY')
-# field_prod.append(out['PARAMS  '][-1,2]) # field production
+def get_simulation_results(file:str):
+    field_prod=[]
+    well_prod=[]
+    out=read_ecl(file)
+    field_prod.append(out['PARAMS  '][-1,2]) # field production
+    return  field_prod
 
 
 
