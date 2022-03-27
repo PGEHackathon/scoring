@@ -20,7 +20,7 @@ def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
-    plt.plot([0,800],[0,800],'--r',label = '1:1 line')
+    plt.plot([0,1500],[0,1500],'--r',label = '1:1 line')
     plt.plot([solution_array[0], solution_array[0]],
              [prediction_array[0], solution_array[0]],
              '--',color = 'gray',label = 'misfit')
@@ -32,7 +32,7 @@ def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     plt.ylabel('Prediction, MSTB'); 
     plt.grid('on'); 
     plt.legend(); 
-    plt.axis([0,800,0, 800])
+    plt.axis([0,1500,0, 1500])
     plt.savefig('accuracy.pgf')
     mape = np.round(mean_absolute_percentage_error(solution_array,prediction_array),5)
     total_prod = result_df['Total_Prod_Field'].to_numpy()[0]
