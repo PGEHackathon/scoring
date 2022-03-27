@@ -17,7 +17,7 @@ matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     prediction_array = result_df['2-Year Cumulative Production (bbl)'].to_numpy() / 1000
-    solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000
+    solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000 + 1.0
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
     plt.plot([20000,150000],[20000,150000],'--r',label = '1:1 line')
@@ -145,6 +145,7 @@ if __name__ == '__main__':
             try: 
                 result = gh.get_file_in_repo('scoring/submission/solution.csv', repo)
             except:
+                print(f"Failed for {repo}")
                 result = None
 
             team_name = repo.split('/')[1]
@@ -166,7 +167,6 @@ if __name__ == '__main__':
                     mape, total_prod = create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df)
                     team_mape.append(mape)
                     team_total_prod.append(total_prod)
-
 
                     presentation_score_df, presentation_comments_df = \
                         get_presentation_dataframes('presentation.csv')
