@@ -17,7 +17,7 @@ matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     prediction_array = result_df['2-Year Cumulative Production (bbl)'].to_numpy() / 1000
-    solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000 + 1.0
+    solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
     plt.plot([20000,150000],[20000,150000],'--r',label = '1:1 line')
