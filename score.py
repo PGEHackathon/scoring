@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import scipy.stats
-from sklearn.metrics import mape
+from sklearn.metrics import mean_absolute_percentage_error as mape
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
