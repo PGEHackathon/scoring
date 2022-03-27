@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import scipy.stats
-from sklearn.metrics import mean_absolute_percentage_error as mape
+from sklearn.metrics import mean_absolute_percentage_error
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -34,7 +34,7 @@ def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     plt.legend(); 
     plt.axis([20000,150000,20000, 150000])
     plt.savefig('accuracy.pgf')
-    mape = np.round(mape(solution_array,prediction_array),5)
+    mape = np.round(mean_absolute_percentage_error(solution_array,prediction_array),5)
     total_prod = result_df['Total_Prod_Field'].to_numpy()[0]
     return mape, total_prod
 
