@@ -24,7 +24,7 @@ def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     plt.plot([solution_array[0], solution_array[0]],
              [prediction_array[0], solution_array[0]],
              '--',color = 'gray',label = 'misfit')
-    for i in range(1,2):
+    for i in range(1,3):
         plt.plot([solution_array[i], solution_array[i]],
                  [prediction_array[i], solution_array[i]],
                  '--',color = 'gray')
