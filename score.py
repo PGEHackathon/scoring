@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import scipy.stats
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mape
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ import json
 pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
 
-def create_accuracy_plot_and_return_mse_and_cumulative_prod(result_df):
+def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     prediction_array = result_df['2-Year Cumulative Production (bbl)'].to_numpy()
     solution_array = result_df['Total_Prod_Well'].to_numpy()
     plt.figure(figsize = (6,4))
@@ -34,9 +34,9 @@ def create_accuracy_plot_and_return_mse_and_cumulative_prod(result_df):
     plt.legend(); 
     plt.axis([20000,150000,20000, 150000])
     plt.savefig('accuracy.pgf')
-    mse = np.round(mean_squared_error(solution_array,prediction_array),3)
+    mape = np.round(mape(solution_array,prediction_array),5)
     total_prod = result_df['Total_Prod_Field'].to_numpy()[0]
-    return mse, total_prod
+    return mape, total_prod
 
 
 latex_jinja_env = jinja2.Environment(
@@ -53,7 +53,7 @@ latex_jinja_env = jinja2.Environment(
         loader = jinja2.FileSystemLoader(os.path.abspath('.'))
 )
 
-def create_team_report(team_name, mse, 
+def create_team_report(team_name, mape, 
                        total_prod, 
                        presentation_comments,
                        code_review_comments):
@@ -62,7 +62,7 @@ def create_team_report(team_name, mse,
 
     #Render tex and write to file
     rendered_tex = template.render(teamname=team_name.replace('_', ' '), 
-                                   mse=mse,
+                                   mape=mape,
                                    total_prod=total_prod,
                                    presentationComments=presentation_comments,
                                    codereviewComments=code_review_comments)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
                     'PGEHackathon/johntfoster', 'PGEHackathon/simulation_results']
 
     team_names = []
-    team_mse = []
+    team_mape = []
     team_total_prod = []
     for repo in repos:
 
@@ -160,8 +160,8 @@ if __name__ == '__main__':
 
                     result_df = pd.read_csv(StringIO(result))
 
-                    mse, total_prod = create_accuracy_plot_and_return_mse_and_cumulative_prod(result_df)
-                    team_mse.append(mse)
+                    mape, total_prod = create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df)
+                    team_mape.append(mape)
                     team_total_prod.append(total_prod)
 
 
@@ -182,27 +182,27 @@ if __name__ == '__main__':
                         code_review_comments = ["None"]
 
 
-                    create_team_report(team_name, mse, 
+                    create_team_report(team_name, mape, 
                                        total_prod, 
                                        presentation_comments,
                                        code_review_comments)
 
     df = pd.DataFrame(np.array([team_names, 
-                                team_mse, 
+                                team_mape, 
                                 team_total_prod]).T, columns=['Team Names',
-                                                              'MSE',
+                                                              'MAPE',
                                                               'Field total production'])
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
     df.set_index(['Short Names'], inplace=True)
 
     df['Pres. Score'] = presentation_score_df
     df['Code Score'] = code_review_score_df
-    df['MSE Rank'] = df['MSE'].astype('float64').rank(method='min', ascending=True, na_option='top')
+    df['MAPE Rank'] = df['MAPE'].astype('float64').rank(method='min', ascending=True, na_option='top')
     df['Total Production Rank'] = df['Field total production'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
-    df['Overall Rank'] = (0.3 * df['MSE Rank'].astype('float64') + 
+    df['Overall Rank'] = (0.3 * df['MAPE Rank'].astype('float64') + 
                           0.3 * df['Total Production Rank'].astype('float64') + 
                           0.3 * df['Pres. Rank'].astype('float64') + 
                           0.1 * df['Code Rank'].astype('float64')
