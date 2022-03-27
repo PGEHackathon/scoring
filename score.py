@@ -20,6 +20,8 @@ def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
     solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
+    plt.plot([20000,150000],[20000,150000],'--r',label = '1:1 line')
+    plt.plot([solution_array[0], solution_array[0]],
              [prediction_array[0], solution_array[0]],
              '--',color = 'gray',label = 'misfit')
     for i in range(1,2):
@@ -140,7 +142,10 @@ if __name__ == '__main__':
         if repo not in blocked_list:
 
             print(f"Collecting submission file for: {repo}")
-            result = gh.get_file_in_repo('scoring/submission/solution.csv', repo)
+            try: 
+                result = gh.get_file_in_repo('scoring/submission/solution.csv', repo)
+            except:
+                result = None
 
             team_name = repo.split('/')[1]
 
