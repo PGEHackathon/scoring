@@ -15,17 +15,14 @@
 \begin{document}
 \maketitle
 
-\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
-   \centering
-   \scalebox{0.75}{\input{accuracy.pgf}}
-   \caption{Accuracy.}
-   \label{fig:accuracy}
-\end{figure}
 %
-Fig~\ref{fig:accuracy} shows your team's predictions compared to the actual production values at 2 years.  The mean absolute percentage error with respect to the true values is \VAR{mape}.  The total field production for your well locations is \VAR{total_prod}.
+Using the following scoring metric
+\[
+    \mbox{score} = 2 \left( \mbox{accuracy} - \frac{1}{2} \right)
+\]
+%
+Your teams score was \VAR{score}.
 
-
-\newpage
 
 \section*{Presentation comments}
 \begin{itemize}

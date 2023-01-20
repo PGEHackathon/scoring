@@ -30,13 +30,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           force: true
-      - name: Push to submissions
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
-        with:
-          source-directory: 'submissions'
-          destination-github-username: 'PGEHackathon'
-          destination-repository-name: 'input_decks'
-          user-email: 'john.foster@utexas.edu'
-          target-branch: main

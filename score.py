@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import scipy.stats
-from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.metrics import accuracy_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,30 +14,6 @@ import json
 
 pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
-
-def create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df):
-    prediction_array = result_df['2-Year Cumulative Production (bbl)'].to_numpy() / 1000
-    solution_array = result_df['Total_Prod_Well'].to_numpy() / 1000
-    plt.figure(figsize = (6,4))
-    plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
-    plt.plot([0,1500],[0,1500],'--r',label = '1:1 line')
-    plt.plot([solution_array[0], solution_array[0]],
-             [prediction_array[0], solution_array[0]],
-             '--',color = 'gray',label = 'misfit')
-    for i in range(1,3):
-        plt.plot([solution_array[i], solution_array[i]],
-                 [prediction_array[i], solution_array[i]],
-                 '--',color = 'gray')
-    plt.xlabel('True, MSTB'); 
-    plt.ylabel('Prediction, MSTB'); 
-    plt.grid('on'); 
-    plt.legend(); 
-    plt.axis([0,1500,0, 1500])
-    plt.savefig('accuracy.pgf')
-    mape = np.round(mean_absolute_percentage_error(solution_array,prediction_array),5)
-    total_prod = result_df['Total_Prod_Field'].to_numpy()[0]
-    return mape, total_prod
-
 
 latex_jinja_env = jinja2.Environment(
     block_start_string = '\BLOCK{',
@@ -53,8 +29,7 @@ latex_jinja_env = jinja2.Environment(
         loader = jinja2.FileSystemLoader(os.path.abspath('.'))
 )
 
-def create_team_report(team_name, mape, 
-                       total_prod, 
+def create_team_report(team_name, score, 
                        presentation_comments,
                        code_review_comments):
 
@@ -62,8 +37,7 @@ def create_team_report(team_name, mape,
 
     #Render tex and write to file
     rendered_tex = template.render(teamname=team_name.replace('_', ' '), 
-                                   mape=mape,
-                                   total_prod=total_prod,
+                                   score=score,
                                    presentationComments=presentation_comments,
                                    codereviewComments=code_review_comments)
     tex_filename = f'{team_name}_report.tex'
@@ -135,15 +109,19 @@ if __name__ == '__main__':
                     'PGEHackathon/johntfoster', 'PGEHackathon/simulation_results']
 
     team_names = []
-    team_mape = []
-    team_total_prod = []
+    team_score = []
+
+    print(f"Getting answers file.")
+    result = gh.get_file_in_repo('answer.csv', 'PGEHackathon/hidden')
+    answer_df = pd.read_csv(StringIO(result))
+
     for repo in repos:
 
         if repo not in blocked_list:
 
             print(f"Collecting submission file for: {repo}")
             try: 
-                result = gh.get_file_in_repo('scoring/submission/solution.csv', repo)
+                result = gh.get_file_in_repo('solution.csv', repo)
             except:
                 print(f"Failed for {repo}")
                 result = None
@@ -152,63 +130,54 @@ if __name__ == '__main__':
 
             if result is not None:
 
-                submission = pd.read_csv(StringIO(result))
-                submission.to_csv(f'submissions/{team_name}_solution.csv')
+                submission_df = pd.read_csv(StringIO(result))
 
-                print(f"Getting results file for: {repo}")
-                result = gh.get_file_in_repo(f'{team_name}_result.csv', 'PGEHackathon/simulation_results')
+                team_names.append(team_name)
 
-                if result is not None:
+                result_df = pd.read_csv(StringIO(result))
 
-                    team_names.append(team_name)
+                accuracy = accuracy_score(answer_df, result_df)
+                score = 2 * (accuracy - 1/2.)
+                team_score.append(score)
 
-                    result_df = pd.read_csv(StringIO(result))
+                presentation_score_df, presentation_comments_df = \
+                    get_presentation_dataframes('presentation.csv')
 
-                    mape, total_prod = create_accuracy_plot_and_return_mape_and_cumulative_prod(result_df)
-                    team_mape.append(mape)
-                    team_total_prod.append(total_prod)
-
-                    presentation_score_df, presentation_comments_df = \
-                        get_presentation_dataframes('presentation.csv')
-
-                    code_review_score_df, code_review_comments_df = \
-                        get_code_review_dataframes('code_review.csv')
+                code_review_score_df, code_review_comments_df = \
+                    get_code_review_dataframes('code_review.csv')
 
 
-                    try:
-                        presentation_comments = \
-                            presentation_comments_df[parse_team_name(team_name)]
-                        code_review_comments = \
-                            code_review_comments_df[parse_team_name(team_name)]
-                    except:
-                        presentation_comments = ["None"]
-                        code_review_comments = ["None"]
+                try:
+                    presentation_comments = \
+                        presentation_comments_df[parse_team_name(team_name)]
+                    code_review_comments = \
+                        code_review_comments_df[parse_team_name(team_name)]
+                except:
+                    presentation_comments = ["None"]
+                    code_review_comments = ["None"]
 
 
-                    create_team_report(team_name, mape, 
-                                       total_prod, 
-                                       presentation_comments,
-                                       code_review_comments)
+                create_team_report(team_name, score, 
+                                   presentation_comments,
+                                   code_review_comments)
 
     df = pd.DataFrame(np.array([team_names, 
-                                team_mape, 
+                                team_score, 
                                 team_total_prod]).T, columns=['Team Names',
-                                                              'MAPE',
-                                                              'Field total production'])
+                                                              'Score'])
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
     df.set_index(['Short Names'], inplace=True)
 
     df['Pres. Score'] = presentation_score_df
     df['Code Score'] = code_review_score_df
-    df['MAPE Rank'] = df['MAPE'].astype('float64').rank(method='min', ascending=True, na_option='top')
+    df['Score Rank'] = df['Score'].astype('float64').rank(method='min', ascending=True, na_option='top')
     df['Total Production Rank'] = df['Field total production'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
-    df['Overall Rank'] = (0.3 * df['MAPE Rank'].astype('float64') + 
-                          0.3 * df['Total Production Rank'].astype('float64') + 
-                          0.3 * df['Pres. Rank'].astype('float64') + 
-                          0.1 * df['Code Rank'].astype('float64')
+    df['Overall Rank'] = (0.75 * df['Score Rank'].astype('float64') + 
+                          0.2 * df['Pres. Rank'].astype('float64') + 
+                          0.05 * df['Code Rank'].astype('float64')
                          ).rank(method='min')
 
     df.sort_values('Overall Rank', inplace=True)
