@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
                 result_df = pd.read_csv(StringIO(result))
 
-                accuracy = accuracy_score(answer_df, result_df)
+                accuracy = accuracy_score(answer_df['Fail in 30 days'], result_df['Fail in 30 days'])
                 score = 2 * (accuracy - 1/2.)
                 team_score.append(score)
 
