@@ -162,16 +162,14 @@ if __name__ == '__main__':
                                    code_review_comments)
 
     df = pd.DataFrame(np.array([team_names, 
-                                team_score, 
-                                team_total_prod]).T, columns=['Team Names',
-                                                              'Score'])
+                                team_score]).T, columns=['Team Names',
+                                                         'Score'])
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
     df.set_index(['Short Names'], inplace=True)
 
     df['Pres. Score'] = presentation_score_df
     df['Code Score'] = code_review_score_df
     df['Score Rank'] = df['Score'].astype('float64').rank(method='min', ascending=True, na_option='top')
-    df['Total Production Rank'] = df['Field total production'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
