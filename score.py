@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
     df['Pres. Score'] = presentation_score_df
     df['Code Score'] = code_review_score_df
-    df['Score Rank'] = df['Score'].astype('float64').rank(method='max', ascending=True, na_option='bottom')
+    df['Score Rank'] = df['Score'].astype('float64').rank(method='max', ascending=False, na_option='bottom')
     df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='bottom')
     df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='bottom')
 
