@@ -16,10 +16,10 @@ pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
-    prediction_array = prediction_df['Est Pump Difference, GPM'].to_numpy()
+    prediction_array = prediction_df["Est Pump Difference, GPM"].to_numpy()
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
-    plt.plot([500,2000],[500,2000],'--r',label = '1:1 line')
+    plt.plot([-100,100],[-100,100],'--r',label = '1:1 line')
     plt.plot([solution_array[0], solution_array[0]],
              [prediction_array[0], solution_array[0]],
              '--',color = 'gray',label = 'misfit')
@@ -27,11 +27,11 @@ def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
         plt.plot([solution_array[i], solution_array[i]],
                  [prediction_array[i], solution_array[i]],
                  '--',color = 'gray')
-    plt.xlabel('True, MSTB'); 
-    plt.ylabel('Prediction, MSTB'); 
+    plt.xlabel('True, GPM'); 
+    plt.ylabel('Prediction, GPM'); 
     plt.grid('on'); 
     plt.legend(); 
-    plt.axis([500,2000,500,2000])
+    plt.axis([-100,100,-100,100])
     plt.savefig('accuracy.pgf')
     return np.round(mean_squared_error(solution_array,prediction_array),3)
 
@@ -74,7 +74,7 @@ def compute_goodness_array(prediction_df, solution_array):
         for j in range(10): # 10 Predrill wells
             min_ = np.percentile(prediction_realizations[j],list_percentile_lower[i])
             max_ = np.percentile(prediction_realizations[j],list_percentile_upper[i])
-            print(solution_array[j])
+            # print(solution_array[j])
             if solution_array[j] > min_ and solution_array[j] < max_:
                 num_within += 1
         goodness_score.append(num_within)
@@ -88,8 +88,8 @@ def create_goodness_plot_and_return_goodness_score(prediction_df, solution_array
     plt.plot(goodness_score,'--ko', label = 'Goodness')
     plt.plot([0,10],[0,10], '-r', label = '1:1 line')
     #plt.fill([i for i in range(11)],goodness_score,alpha = 0.2, label = 'misfit area')
-    plt.xticks([i for i in np.linspace(0,10,6)], [f'{np.int(i*10)}%' for i in np.linspace(0,10,6)])
-    plt.yticks([i for i in np.linspace(0,10,6)], [f'{np.int(i*10)}%' for i in np.linspace(0,10,6)])
+    plt.xticks([i for i in np.linspace(0,10,6)], [f'{np.int64(i*10)}%' for i in np.linspace(0,10,6)])
+    plt.yticks([i for i in np.linspace(0,10,6)], [f'{np.int64(i*10)}%' for i in np.linspace(0,10,6)])
     plt.xlabel('Within percentile'); 
     plt.ylabel('Percentage of wells within the range')
     plt.legend(); 
@@ -206,6 +206,7 @@ if __name__ == '__main__':
                     'PGEHackathon/resources', 'PGEHackathon/TheNomads', 
                     'PGEHackathon/hidden', 'PGEHackathon/data2021', 'PGEHackathon/data2022'
                     'PGEHackathon/data2023']
+    repos = ['PGEHackathon/HackathonTeamName']
 
     # Get answers
     result = gh.get_file_in_repo('answer.csv', 'PGEHackathon/hidden')
