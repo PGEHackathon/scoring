@@ -38,22 +38,22 @@ def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
 def create_realizations_plots(prediction_df, solution_array):
     prediction_realizations = prediction_df.iloc[:,2:].to_numpy()
     kde = [scipy.stats.gaussian_kde(prediction_realizations[i], 
-                                    bw_method = None) for i in range(10)]
+                                    bw_method = None) for i in range(15)]
     t_range = [np.linspace(prediction_realizations[i].min() * 0.8,
-                           prediction_realizations[i].max() * 1.2, 200) for i in range(10)]
+                           prediction_realizations[i].max() * 1.2, 200) for i in range(15)]
     
-    plt.figure(figsize =(6,8))
-    for i in range(10):
-        ax = plt.subplot(5,2,i+1)
+    plt.figure(figsize =(8,10))
+    for i, item in enumerate([4, 31, 42, 52, 71, 76, 96, 131, 137, 194, 220, 236, 265, 321, 345]):
+        ax = plt.subplot(8,2,i+1)
         if i == 0:
             pdf, = ax.plot(t_range[i],kde[i](t_range[i]), lw=2, label=f'PDF of reals')
             real, = ax.plot(solution_array[i], 0,'ro',markersize = 10, label ='True')
             plt.xlabel('Prediction, MSTB');
-            plt.title(f'Preproduction No. {74+i}')
+            plt.title(f'Well ID {item}')
         else:
             pdf, = ax.plot(t_range[i],kde[i](t_range[i]), lw=2)
             real, = ax.plot(solution_array[i], 0, 'ro',markersize = 10)
-            plt.title(f'Preproduction No. {74+i}')
+            plt.title(f'Well ID {item}')
         if i == 1:
             plt.legend([pdf, real], ['PDF of realz.', 'True'], bbox_to_anchor=(1.05, 1.0), loc='upper left')
         if i % 2 == 0:
