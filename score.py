@@ -16,7 +16,7 @@ pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
-    prediction_array = prediction_df['Prediction, MSTB'].to_numpy()
+    prediction_array = prediction_df['Est Pump Difference, GPM'].to_numpy()
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
     plt.plot([500,2000],[500,2000],'--r',label = '1:1 line')
