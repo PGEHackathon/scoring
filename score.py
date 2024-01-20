@@ -206,7 +206,7 @@ if __name__ == '__main__':
                     'PGEHackathon/resources', 'PGEHackathon/TheNomads', 
                     'PGEHackathon/hidden', 'PGEHackathon/data2021', 'PGEHackathon/data2022'
                     'PGEHackathon/data2023']
-    repos = ['PGEHackathon/HackathonTeamName']
+    repos = ['PGEHackathon/NoFreeLunch']
 
     # Get answers
     result = gh.get_file_in_repo('answer.csv', 'PGEHackathon/hidden')
