@@ -29,7 +29,7 @@ class Github(object):
         elif repo_type == "all":
             return public_repos + private_repos
 
-    def get_organization_repos(self, organization, repo_type="all", exclude_archived=True):
+    def get_organization_repos(self, organization, repo_type="all"):
 
         number_of_repos = self.get_number_of_repos(organization, repo_type=repo_type)
 
@@ -44,11 +44,7 @@ class Github(object):
             )
 
             for item in response.json():
-                if exclude_archived:
-                    if not item["archived"]:
-                        repos.append(item["full_name"])
-                else:
-                    repos.append(item["full_name"])
+                repos.append(item["full_name"])
 
         return repos
 
@@ -102,7 +98,7 @@ class Github(object):
             
         return 
 
-    def get_file_in_repo(self, filename, repo, decoder='utf-8'):
+    def get_file_in_repo(self, filename, repo):
         
         result = requests.get("https://api.github.com/repos/{}/contents/{}".format(repo, filename), 
                       headers=self.headers)
@@ -110,7 +106,7 @@ class Github(object):
         if result.status_code == 200:
             byte_content = result.json()['content']
             base64_bytes = base64.b64decode(byte_content)
-            base64_string = base64_bytes.decode(decoder)
+            base64_string = base64_bytes.decode('utf-8')
             return base64_string
         else:
             return None
