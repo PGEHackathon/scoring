@@ -15,7 +15,7 @@ jobs:
         env:
           PGEHACKATHON_SECRET_TOKEN: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
         run: |
-          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
+          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-fonts-extra texlive-latex-recommended texlive-pictures latexmk
           python score.py
       - name: Commit Changes
         shell: bash -l {0}
