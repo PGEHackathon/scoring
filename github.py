@@ -29,7 +29,7 @@ class Github(object):
         elif repo_type == "all":
             return public_repos + private_repos
 
-    def get_organization_repos(self, organization, repo_type="all"):
+    def get_organization_repos(self, organization, repo_type="all", exclude_archived=True):
 
         number_of_repos = self.get_number_of_repos(organization, repo_type=repo_type)
 
@@ -44,7 +44,11 @@ class Github(object):
             )
 
             for item in response.json():
-                repos.append(item["full_name"])
+                if exclude_archived:
+                    if not item["archived"]:
+                        repos.append(item["full_name"])
+                else:
+                    repos.append(item["full_name"])
 
         return repos
 
