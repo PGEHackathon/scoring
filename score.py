@@ -278,10 +278,10 @@ if __name__ == '__main__':
     df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
-    df['Overall Rank'] = (df['MSE Rank'].astype('float64') + 
-                          df['Goodness Rank'].astype('float64') + 
-                          df['Pres. Rank'].astype('float64') + 
-                          df['Code Rank'].astype('float64')
+    df['Overall Rank'] = (0.375 * df['MSE Rank'].astype('float64') + 
+                          0.375 * df['Goodness Rank'].astype('float64') + 
+                          0.200 * df['Pres. Rank'].astype('float64') + 
+                          0.050 * df['Code Rank'].astype('float64')
                          ).rank(method='min')
 
     df.sort_values('Overall Rank', inplace=True)
