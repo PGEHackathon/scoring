@@ -12,7 +12,7 @@ import subprocess
 import matplotlib
 import json
 
-pgf_with_latex = {"pgf.texsystem": 'pdflatex', "text.usetex": True, "font.family": "serif"}
+pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
 matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
