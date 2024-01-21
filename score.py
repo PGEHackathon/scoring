@@ -13,7 +13,7 @@ import matplotlib
 import json
 
 plt.rcParams.update({
-    "pgf.texsystem": "pdflatex",        # Change to your LaTeX system
+    "pgf.texsystem": "lualatex",        # Change to your LaTeX system
 })
 #matplotlib.rcParams.update(pgf_with_latex)
 
