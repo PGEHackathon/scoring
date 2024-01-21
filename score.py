@@ -73,7 +73,7 @@ def compute_goodness_array(prediction_df, solution_array):
 
     for i in range(11):     # 0%, 10%, 20%, 30%, ... 100% percentiles ranges
         num_within = 0      # Counts for wells within the range
-        for j in range(10): # 10 Predrill wells
+        for j in range(15): # 15 Predrill wells
             min_ = np.percentile(prediction_realizations[j],list_percentile_lower[i])
             max_ = np.percentile(prediction_realizations[j],list_percentile_upper[i])
             # print(solution_array[j])
@@ -205,10 +205,9 @@ if __name__ == '__main__':
 
     blocked_list = ['PGEHackathon/data', 'PGEHackathon/workshop', 
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
-                    'PGEHackathon/resources', 'PGEHackathon/TheNomads', 
+                    'PGEHackathon/resources',  
                     'PGEHackathon/hidden', 'PGEHackathon/data2021', 'PGEHackathon/data2022'
                     'PGEHackathon/data2023']
-    repos = ['PGEHackathon/NoFreeLunch']
 
     # Get answers
     result = gh.get_file_in_repo('answer.csv', 'PGEHackathon/hidden')
@@ -231,7 +230,7 @@ if __name__ == '__main__':
                 prediction_df = pd.read_csv(StringIO(result))
 
                 if prediction_df["Est Pump Difference, GPM"].mean() == -999:
-                    break
+                    continue 
 
                 team_name = repo.split('/')[1]
                 team_names.append(team_name)
@@ -275,6 +274,7 @@ if __name__ == '__main__':
                                                                   'MSE',
                                                                   'Goodness Score'])
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
+    df['Team Names'] = df['Team Names'].apply(parse_team_name)
     df.set_index(['Short Names'], inplace=True)
 
     df['Pres. Score'] = presentation_score_df
