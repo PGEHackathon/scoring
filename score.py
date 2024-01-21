@@ -293,5 +293,5 @@ if __name__ == '__main__':
     with open('final_rankings_table.tex', 'w') as f:
         df.to_latex(index=False, buf=f)
 
-    subprocess.run(['latexmk', '-pdf', 
+    subprocess.run(['latexmk', '-pdflua', 
                     '-output-directory=reports', 'final_report.tex'])
