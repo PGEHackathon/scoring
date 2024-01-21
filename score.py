@@ -12,18 +12,20 @@ import subprocess
 import matplotlib
 import json
 
-pgf_with_latex = {"pgf.texsystem": 'pdflatex'}
-matplotlib.rcParams.update(pgf_with_latex)
+plt.rcParams.update({
+    "pgf.texsystem": "pdflatex",        # Change to your LaTeX system
+})
+#matplotlib.rcParams.update(pgf_with_latex)
 
 def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
     prediction_array = prediction_df["Est Pump Difference, GPM"].to_numpy()
     plt.figure(figsize = (6,4))
     plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
-    plt.plot([-100,100],[-100,100],'--r',label = '1:1 line')
+    plt.plot([-50,100],[-50,100],'--r',label = '1:1 line')
     plt.plot([solution_array[0], solution_array[0]],
              [prediction_array[0], solution_array[0]],
              '--',color = 'gray',label = 'misfit')
-    for i in range(1,10):
+    for i in range(1,15):
         plt.plot([solution_array[i], solution_array[i]],
                  [prediction_array[i], solution_array[i]],
                  '--',color = 'gray')
@@ -31,7 +33,7 @@ def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
     plt.ylabel('Prediction, GPM'); 
     plt.grid('on'); 
     plt.legend(); 
-    plt.axis([-100,100,-100,100])
+    plt.axis([-50,100,-50,100])
     plt.savefig('accuracy.pgf')
     return np.round(mean_squared_error(solution_array,prediction_array),3)
 
