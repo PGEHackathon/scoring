@@ -228,10 +228,13 @@ if __name__ == '__main__':
 
             if result is not None:
 
+                prediction_df = pd.read_csv(StringIO(result))
+
+                if prediction_df["Est Pump Difference, GPM"].mean() == -999:
+                    break
+
                 team_name = repo.split('/')[1]
                 team_names.append(team_name)
-
-                prediction_df = pd.read_csv(StringIO(result))
 
                 mse = create_accuracy_plot_and_return_mse(prediction_df, 
                                                           solution_array)
