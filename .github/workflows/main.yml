@@ -1,7 +1,7 @@
 on:
   push:
-  repository_dispatch:
-    types: [trigger]
+  # repository_dispatch:
+  #   types: [trigger]
 jobs:
   scoring:
     runs-on: "ubuntu-20.04"
