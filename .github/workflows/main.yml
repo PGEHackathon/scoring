@@ -4,7 +4,7 @@ on:
   #   types: [trigger]
 jobs:
   scoring:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
       - uses: mamba-org/provision-with-micromamba@main
@@ -15,8 +15,9 @@ jobs:
         env:
           PGEHACKATHON_SECRET_TOKEN: ${{ secrets.PGEHACKATHON_ORG_TOKEN }}
         run: |
-          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-fonts-extra texlive-latex-recommended texlive-pictures latexmk
+          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-full latexmk
           python score.py
+          # sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-fonts-extra texlive-latex-recommended texlive-pictures latexmk
       - name: Commit Changes
         shell: bash -l {0}
         run: |
