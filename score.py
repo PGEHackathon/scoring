@@ -145,7 +145,7 @@ def create_team_report(team_name, mse,
         f.write(rendered_tex)
 
     #run latex on the file
-    subprocess.run(['latexmk', '-pdf', 
+    subprocess.run(['latexmk', '-pdflua', 
                     '-output-directory=reports', tex_filename])
     return
 
