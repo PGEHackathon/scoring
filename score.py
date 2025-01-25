@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import scipy.stats
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_percentage_error
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,53 +9,84 @@ import jinja2
 from jinja2 import Template
 import os
 import subprocess
-import matplotlib
-import json
+import UTuning.plots
+import UTuning.scorer
 
 plt.rcParams.update({
     "pgf.texsystem": "lualatex",        # Change to your LaTeX system
 })
 #matplotlib.rcParams.update(pgf_with_latex)
 
-def create_accuracy_plot_and_return_mse(prediction_df, solution_array):
-    prediction_array = prediction_df["Est Pump Difference, GPM"].to_numpy()
+def create_accuracy_plot_and_return_mape(prediction_df, solution_array):
+
+    prediction_df = prediction_df.set_index(['Masked Well Name'])
+
+    # Initialize empty column for normalized values
+    prediction_df['Normalized Fuel Value'] = 0.0
+    normalized_solution_array = np.zeros(len(prediction_df), dtype=np.double)
+
+    # Normalize each fuel type separately
+    for fuel_type in ['Grid', 'Turbine', 'Diesel', 'DBG_CNG', 'DBG_Diesel']:
+        mask = prediction_df['Fuel Type'] == fuel_type
+        if mask.any():
+            #Normalize prediction
+            fuel_values = prediction_df.loc[mask, 'Fuel Value']
+            min_val = fuel_values.min()
+            max_val = fuel_values.max()
+            if max_val > min_val:  # Avoid division by zero
+                prediction_df.loc[mask, 'Normalized Fuel Value'] = (fuel_values - min_val) / (max_val - min_val)
+
+            #Normalize solution array
+            fuel_values = solution_array[mask]
+            min_val = np.min(fuel_values)
+            max_val = np.max(fuel_values)
+            if max_val > min_val:  # Avoid division by zero
+                normalized_solution_array[mask] = (fuel_values - min_val) / (max_val - min_val)
+
+
+    normalized_prediction_array = prediction_df["Normalized Fuel Value"].to_numpy()
+
     plt.figure(figsize = (6,4))
-    plt.plot(solution_array, prediction_array,'o',label = 'Estimates')
-    plt.plot([-50,100],[-50,100],'--r',label = '1:1 line')
-    plt.plot([solution_array[0], solution_array[0]],
-             [prediction_array[0], solution_array[0]],
+    plt.plot(normalized_solution_array, normalized_prediction_array,'o',label = 'Estimates')
+    plt.plot([-0.05,1.05],[-0.05,1.05],'--r',label = '1:1 line')
+    plt.plot([normalized_solution_array[0], normalized_solution_array[0]],
+             [normalized_prediction_array[0], normalized_solution_array[0]],
              '--',color = 'gray',label = 'misfit')
-    for i in range(1,15):
-        plt.plot([solution_array[i], solution_array[i]],
-                 [prediction_array[i], solution_array[i]],
+    for i in range(1,len(solution_array)):
+        plt.plot([normalized_solution_array[i], normalized_solution_array[i]],
+                 [normalized_prediction_array[i], normalized_solution_array[i]],
                  '--',color = 'gray')
-    plt.xlabel('True, GPM'); 
-    plt.ylabel('Prediction, GPM'); 
+    plt.xlabel('Normalized True Value'); 
+    plt.ylabel('Normalized Prediction'); 
     plt.grid('on'); 
     plt.legend(); 
-    plt.axis([-50,100,-50,100])
+    plt.axis([-0.05,1.05,-0.05,1.05])
+    # plt.show()
     plt.savefig('accuracy.pgf')
-    return np.round(mean_squared_error(solution_array,prediction_array),3)
+    return np.round(mean_absolute_percentage_error(solution_array,prediction_df['Fuel Value'].to_numpy()),3)
 
 def create_realizations_plots(prediction_df, solution_array):
-    prediction_realizations = prediction_df.iloc[:,2:].to_numpy()
+    prediction_df = prediction_df.head(10)
+    well_names = prediction_df['Masked Well Name'].tolist()
+    fuel_type = prediction_df['Fuel Type'].tolist()
+    prediction_realizations = prediction_df.iloc[:,3:].to_numpy()
     kde = [scipy.stats.gaussian_kde(prediction_realizations[i], 
-                                    bw_method = None) for i in range(15)]
+                                    bw_method = None) for i in range(10)]
     t_range = [np.linspace(prediction_realizations[i].min() * 0.8,
-                           prediction_realizations[i].max() * 1.2, 200) for i in range(15)]
+                           prediction_realizations[i].max() * 1.2, 200) for i in range(10)]
     
     plt.figure(figsize =(8,10))
-    for i, item in enumerate([4, 31, 42, 52, 71, 76, 96, 131, 137, 194, 220, 236, 265, 321, 345]):
-        ax = plt.subplot(8,2,i+1)
+    for i, name in enumerate(well_names):
+        ax = plt.subplot(5,2,i+1)
         if i == 0:
             pdf, = ax.plot(t_range[i],kde[i](t_range[i]), lw=2, label=f'PDF of reals')
             real, = ax.plot(solution_array[i], 0,'ro',markersize = 10, label ='True')
-            plt.xlabel('Prediction, MSTB');
-            plt.title(f'Well ID {item}')
+            plt.xlabel('Prediction');
+            plt.title(f'Well: {name} \nFuel Type: {fuel_type[i]}')
         else:
             pdf, = ax.plot(t_range[i],kde[i](t_range[i]), lw=2)
             real, = ax.plot(solution_array[i], 0, 'ro',markersize = 10)
-            plt.title(f'Well ID {item}')
+            plt.title(f'Well ID {name} \nFuel Type: {fuel_type[i]}')
         if i == 1:
             plt.legend([pdf, real], ['PDF of realz.', 'True'], bbox_to_anchor=(1.05, 1.0), loc='upper left')
         if i % 2 == 0:
@@ -65,53 +96,26 @@ def create_realizations_plots(prediction_df, solution_array):
     plt.savefig('realizations.pgf')
     return
 
-def compute_goodness_array(prediction_df, solution_array):
-    prediction_realizations = prediction_df.iloc[:,2:].to_numpy()
-    goodness_score = []
-    list_percentile_lower = [50-5*i for i in range(0,11)]   # Define upper/lower boundary of "within-percentile" ranges
-    list_percentile_upper = [50+5*i for i in range(0,11)]   # E.g., 10% range - from 45% to 55% percentile
-
-    for i in range(11):     # 0%, 10%, 20%, 30%, ... 100% percentiles ranges
-        num_within = 0      # Counts for wells within the range
-        for j in range(15): # 15 Predrill wells
-            min_ = np.percentile(prediction_realizations[j],list_percentile_lower[i])
-            max_ = np.percentile(prediction_realizations[j],list_percentile_upper[i])
-            # print(solution_array[j])
-            if solution_array[j] > min_ and solution_array[j] < max_:
-                num_within += 1
-        goodness_score.append(num_within)
-    return goodness_score
-
 def create_goodness_plot_and_return_goodness_score(prediction_df, solution_array):
-    goodness_score = compute_goodness_array(prediction_df, solution_array)
-    prediction_realizations = prediction_df.iloc[:,2:].to_numpy()
 
-    plt.figure(figsize = (6,4))
-    plt.plot(goodness_score,'--ko', label = 'Goodness')
-    plt.plot([0,10],[0,10], '-r', label = '1:1 line')
-    #plt.fill([i for i in range(11)],goodness_score,alpha = 0.2, label = 'misfit area')
-    plt.xticks([i for i in np.linspace(0,10,6)], [f'{np.int64(i*10)}%' for i in np.linspace(0,10,6)])
-    plt.yticks([i for i in np.linspace(0,10,6)], [f'{np.int64(i*10)}%' for i in np.linspace(0,10,6)])
-    plt.xlabel('Within percentile'); 
-    plt.ylabel('Percentage of wells within the range')
-    plt.legend(); 
-    plt.savefig('goodness.pgf')
+    prediction_realizations = prediction_df.iloc[:,3:].to_numpy()
+    std_array = np.std(prediction_realizations, axis=1)
 
-    ## Total area of plot is 100 (square of 10 x 10)
-    # If goodness plot perfectly along with 1:1 line, that should be "1" 
-    # If goodness plot all flat at 0% in y-axis, that should be "0" 
-    # If goodness plot all flat at 100% in y-axis, that should be "0.5" 
-    # Follow lines of code compute and normalize area above/below area to get goodness score (0~1)
-    goodness_score_upNdown = np.array(goodness_score) - np.arange(0,11) 
-    a_interval_index = [1 if goodness_score[i+1] >= i+1 else 0 for i in range(10)]
-    goodness_score_ = 1
-    for i in range(10):
-        if a_interval_index[i] == 1:
-            goodness_score_ -= +1/2*goodness_score_upNdown[i+1]/45
-        else:
-            goodness_score_ -= -goodness_score_upNdown[i+1]/55
+    score = UTuning.scorer.scorer(prediction_realizations, solution_array, std_array)
 
-    return np.abs(np.round(goodness_score_,3))
+    IF_array = score.IndicatorFunction()
+
+    n_quantiles = 11
+    perc = np.linspace(0.0, 1.00, n_quantiles)
+
+    fig, ax = UTuning.plots.goodness_plot(perc, IF_array, prediction_realizations, solution_array, std_array)
+    ax.legend(loc='upper left', bbox_to_anchor=(0,1))
+    fig.savefig('goodness.pgf')
+
+    return score.Goodness()
+
+
+
 
 latex_jinja_env = jinja2.Environment(
     block_start_string = '\BLOCK{',
@@ -127,7 +131,7 @@ latex_jinja_env = jinja2.Environment(
         loader = jinja2.FileSystemLoader(os.path.abspath('.'))
 )
 
-def create_team_report(team_name, mse, 
+def create_team_report(team_name, mape, 
                        goodness_score, 
                        presentation_comments,
                        code_review_comments):
@@ -136,7 +140,7 @@ def create_team_report(team_name, mse,
 
     #Render tex and write to file
     rendered_tex = template.render(teamname=team_name.replace('_', ' '), 
-                                   mse=mse,
+                                   mape=mape,
                                    goodness=goodness_score,
                                    presentationComments=presentation_comments,
                                    codereviewComments=code_review_comments)
@@ -165,7 +169,7 @@ def get_presentation_dataframes(presentation_csv):
     df['Q3'] = df['Q3'].apply(parse_question_scores)
     df['Q4'] = df['Q4'].apply(parse_question_scores)
     df['Q5'] = df['Q5'].apply(parse_question_scores)
-    df['Q6'] = df['Q6'].apply(parse_question_scores)
+    df['Q6'] = df['Q6'].apply(parse_question_scores) * 3
     df['Q7'] = df['Q7'].apply(parse_question_scores)
     df['Q8'] = df['Q8'].apply(parse_question_scores)
 
@@ -207,15 +211,16 @@ if __name__ == '__main__':
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
                     'PGEHackathon/resources',  
                     'PGEHackathon/hidden', 'PGEHackathon/data2021', 'PGEHackathon/data2022'
-                    'PGEHackathon/data2023']
+                    'PGEHackathon/data2023', 'PGEHackathon/data2024']
 
     # Get answers
     result = gh.get_file_in_repo('answer.csv', 'PGEHackathon/hidden')
-    solution_array = pd.read_csv(StringIO(result)).iloc[:, 1].to_numpy()
+    solution_df = pd.read_csv(StringIO(result))
+    solution_array = solution_df.sort_values(by=['Masked Well Name', 'Fuel Type']).iloc[:, 2].to_numpy()
 
 
     team_names = []
-    team_mse = []
+    team_mape = []
     team_goodness_score = []
     for repo in repos:
 
@@ -228,16 +233,17 @@ if __name__ == '__main__':
             if result is not None:
 
                 prediction_df = pd.read_csv(StringIO(result))
+                prediction_df = prediction_df.sort_values(by=['Masked Well Name', 'Fuel Type'])
 
-                if prediction_df["Est Pump Difference, GPM"].mean() == -999:
+                if prediction_df["Fuel Value"].mean() == 1:
                     continue 
 
                 team_name = repo.split('/')[1]
                 team_names.append(team_name)
 
-                mse = create_accuracy_plot_and_return_mse(prediction_df, 
-                                                          solution_array)
-                team_mse.append(mse)
+                mape = create_accuracy_plot_and_return_mape(prediction_df, 
+                                                            solution_array)
+                team_mape.append(mape)
 
                 create_realizations_plots(prediction_df, solution_array)
 
@@ -263,15 +269,15 @@ if __name__ == '__main__':
                     code_review_comments = ["None"]
 
 
-                create_team_report(team_name, mse, 
+                create_team_report(team_name, mape, 
                                    goodness_score, 
                                    presentation_comments,
                                    code_review_comments)
 
     df = pd.DataFrame(np.array([team_names, 
-                                team_mse, 
+                                team_mape, 
                                 team_goodness_score]).T, columns=['Team Names',
-                                                                  'MSE',
+                                                                  'MAPE',
                                                                   'Goodness Score'])
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
     df['Team Names'] = df['Team Names'].apply(parse_team_name)
@@ -279,12 +285,12 @@ if __name__ == '__main__':
 
     df['Pres. Score'] = presentation_score_df
     df['Code Score'] = code_review_score_df
-    df['MSE Rank'] = df['MSE'].astype('float64').rank(method='min', ascending=True, na_option='top')
+    df['MAPE Rank'] = df['MAPE'].astype('float64').rank(method='min', ascending=True, na_option='top')
     df['Goodness Rank'] = df['Goodness Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Pres. Rank'] = df['Pres. Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
     df['Code Rank'] = df['Code Score'].astype('float64').rank(method='min', ascending=False, na_option='top')
 
-    df['Overall Rank'] = (0.375 * df['MSE Rank'].astype('float64') + 
+    df['Overall Rank'] = (0.375 * df['MAPE Rank'].astype('float64') + 
                           0.375 * df['Goodness Rank'].astype('float64') + 
                           0.200 * df['Pres. Rank'].astype('float64') + 
                           0.050 * df['Code Rank'].astype('float64')
