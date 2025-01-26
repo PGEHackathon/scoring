@@ -112,7 +112,7 @@ def create_goodness_plot_and_return_goodness_score(prediction_df, solution_array
     ax.legend(loc='upper left', bbox_to_anchor=(0,1))
     fig.savefig('goodness.pgf')
 
-    return score.Goodness()
+    return np.round(score.Goodness(), 3)
 
 
 
@@ -279,6 +279,8 @@ if __name__ == '__main__':
                                 team_goodness_score]).T, columns=['Team Names',
                                                                   'MAPE',
                                                                   'Goodness Score'])
+    df['Team Names'].to_csv('team_names.csv', index=False)
+
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
     df['Team Names'] = df['Team Names'].apply(parse_team_name)
     df.set_index(['Short Names'], inplace=True)
