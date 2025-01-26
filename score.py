@@ -111,6 +111,7 @@ def create_goodness_plot_and_return_goodness_score(prediction_df, solution_array
     fig, ax = UTuning.plots.goodness_plot(perc, IF_array, prediction_realizations, solution_array, std_array)
     ax.legend(loc='upper left', bbox_to_anchor=(0,1))
     fig.savefig('goodness.pgf')
+    plt.close()
 
     return np.round(score.Goodness(), 3)
 
@@ -211,7 +212,12 @@ if __name__ == '__main__':
                     'PGEHackathon/scoring', 'PGEHackathon/PGEHackathon', 
                     'PGEHackathon/resources',  
                     'PGEHackathon/hidden', 'PGEHackathon/data2021', 'PGEHackathon/data2022'
-                    'PGEHackathon/data2023', 'PGEHackathon/data2024']
+                    'PGEHackathon/data2023', 'PGEHackathon/data2024', 
+                    'PGEHackathon/pge-hackathon2025-GuabaPy', 
+                    'PGEHackathon/EulersOilers', 
+                    'PGEHackathon/PartyRockers', 
+                    'PGEHackathon/rubber_duckies', 
+                    'PGEHackathon/VOX']
 
     # Get answers
     result = gh.get_file_in_repo('answer.csv', 'PGEHackathon/hidden')
@@ -279,7 +285,7 @@ if __name__ == '__main__':
                                 team_goodness_score]).T, columns=['Team Names',
                                                                   'MAPE',
                                                                   'Goodness Score'])
-    df['Team Names'].to_csv('team_names.csv', index=False)
+    #df['Team Names'].to_csv('team_names.csv', index=False)
 
     df['Short Names'] = df['Team Names'].apply(parse_team_name)
     df['Team Names'] = df['Team Names'].apply(parse_team_name)
